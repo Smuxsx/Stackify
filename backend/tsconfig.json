@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "es2022",
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
