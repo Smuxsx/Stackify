@@ -1,9 +1,6 @@
 import { defineConfig } from 'drizzle-kit';
 import { ENV } from './src/config/env';
 
-import { defineConfig } from 'drizzle-kit';
-import { ENV } from './src/config/env';
-
 if (!ENV.DB_URL) {
     throw new Error("DB_URL is not set in environment variables");
 }
