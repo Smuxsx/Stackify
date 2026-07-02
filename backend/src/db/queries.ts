@@ -87,12 +87,12 @@ export const deleteProduct = async (id: string) => {
 }
 
 export const upsertProduct = async (data: NewProduct) => {
-    const existingProduct = await getProductById(data.id!);
+    if (!data.id) return createProduct(data);
 
-    if (existingProduct) return UpdateProduct(data.id!, data) 
+    const existingProduct = await getProductById(data.id);
+    if (existingProduct) return UpdateProduct(data.id, data);
 
     return createProduct(data)
-
 };
 
 // COMMENT QUERIES
