@@ -106,8 +106,8 @@ export const createComment = async (data:NewComment) => {
 // Delete Commment
 
 export const deleteComment = async (id: string) => {
-    const [deletedCommment] = await db.delete(comments).where(eq(comments.id, id)).returning();
-    return deleteComment;
+    const [deletedComment] = await db.delete(comments).where(eq(comments.id, id)).returning();
+    return deletedComment;
 }
 
 // Get Comment By comment Id
