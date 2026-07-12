@@ -46,7 +46,7 @@ export const deleteComment = async (req:Request<commentsParams>, res:Response) =
         if (!userId) return res.status(401).json({error: "Unathorized"})
             
         const { commentId } = req.params;
-        if(!commentId) return res.status(404).json({error: "Product not found"})
+        if(!commentId) return res.status(404).json({error: "Comment not found"})
 
         const comment = await queries.getCommentById(commentId);
         if (!comment) return res.status(404).json({error:"Comment not found"})
