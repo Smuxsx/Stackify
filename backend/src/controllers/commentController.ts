@@ -23,7 +23,8 @@ export const createComment = async (req:Request<commentsParams>, res:Response) =
         }
 
         const { productId } = req.params;
-        if (!productId) return res.status(404).json({error: "Product not found"});
+        const product = await queries.getProductById(productId);
+        if (!product) return res.status(404).json({error: "Product not found"});
         
         const comment = await queries.createComment({
             content,
