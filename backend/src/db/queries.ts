@@ -1,8 +1,8 @@
 // This is where we are going to create all of the methods (query products, add products, add user, etc) in our app.
 
-import { db } from "./index";
+import { db } from "./index.ts";
 import { eq } from 'drizzle-orm';
-import { users, comments, products, type NewUser, type NewComment, type NewProduct} from './schema';
+import { users, comments, products, type NewUser, type NewComment, type NewProduct} from './schema.ts';
 
 // User queries
 
