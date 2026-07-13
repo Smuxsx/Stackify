@@ -131,7 +131,7 @@ export const deleteProduct = async (req:Request<productParams>, res:Response) =>
         if (!existingProduct) return res.status(404).json({ error: "Product not found"})
 
         if (existingProduct.userId !== userId) {
-            res.status(401).json({error: "Unathorized"});
+            res.status(403).json({error: "Forbidden"});
             return;
         }
 
@@ -141,7 +141,7 @@ export const deleteProduct = async (req:Request<productParams>, res:Response) =>
 
 
     } catch (error) {
-        console.error("Error creating product", error);
+        console.error("Error deleting product", error);
         res.status(500).json({error: "Failed to delete product"})
     }
 }
