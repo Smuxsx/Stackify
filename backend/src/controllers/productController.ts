@@ -88,6 +88,11 @@ export const updateProduct = async (req:Request<productParams>, res:Response) =>
         const { id } = req.params;
         const {title, description, imageUrl} = req.body;
 
+        if (!title && !description && !imageUrl) {
+            res.status(400).json({error: "At least one field (title, description, or imageUrl) required"});
+            return;
+        }
+
         // Check if product exists and belongs to user
         const existingProduct = await queries.getProductById(id);
 
@@ -97,7 +102,7 @@ export const updateProduct = async (req:Request<productParams>, res:Response) =>
         }
 
         if (existingProduct.userId !== userId) {
-            res.status(401).json({error: "Unathorized"});
+            res.status(403).json({error: "Forbidden"});
             return
         }
         
@@ -106,10 +111,10 @@ export const updateProduct = async (req:Request<productParams>, res:Response) =>
             description,
             imageUrl
         })
-        res.status(201).json(updatedProduct)
+        res.status(200).json(updatedProduct)
         
     } catch (error) {
-        console.error("Error creating product", error);
+        console.error("Error updating product", error);
         res.status(500).json({error: "Failed to update product"})
     }
 }
