@@ -8,6 +8,6 @@ const router = Router();
 router.post("/:productId", requireAuth(), commentController.createComment);
 
 // POST /api/comments/:productId delete a comment
-router.delete(":productId", requireAuth(), commentController.deleteComment);
+router.delete("/:productId", requireAuth(), commentController.deleteComment);
 
 export default router;
