@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Show, SignInButton, SignOutButton } from '@clerk/react'
+import { Show, SignInButton, SignOutButton, useAuth } from '@clerk/react'
 import { Route, Routes } from "react-router"
 import NavBar from './components/NavBar'
 import ProductPage from './pages/ProductPage'
@@ -7,10 +7,15 @@ import HomePage from './pages/HomePage'
 import CreatePage from './pages/CreatePage'
 import EditProductPage from './pages/EditProductPage'
 import ProfilePage from './pages/ProfilePage'
+import useAuthRequest from './hooks/useAuthRequest'
+import useUserSync from './hooks/useUserSync'
 
-export class App extends Component {
 
-  render() {
+
+function App(){
+    const {isClerkLoaded, isSignedIn} = useAuthRequest()
+    useUserSync()
+    if (!isClerkLoaded) return null;
     return (
       <div className='min-h-screen bg-base-100'>
         <NavBar />
@@ -26,7 +31,6 @@ export class App extends Component {
       </div>
     )
   }
-}
 
 export default App
 

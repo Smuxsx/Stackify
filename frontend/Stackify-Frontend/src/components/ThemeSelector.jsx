@@ -9,11 +9,13 @@ const THEMES = [
 
 function ThemeSelector() {
     const [Theme, setTheme] = useState(() => {
+        // check prevents an error in environments where window does not exist, such as server-side rendering.
         if (typeof window !== "undefined"){
-            return localStorage.getItem("theme") || "Light"
+            // This checks whether the user previously selected a theme. If not light
+            return localStorage.getItem("theme") || "light"
         }
 
-        return "Light"
+        return "light"
     });
 
     useEffect(() => {
@@ -28,6 +30,7 @@ function ThemeSelector() {
             <span className='hidden sm:inline'>Theme</span>
         </div>
         <ul tabIndex={0} className='dropdown-content menu bg-base-200 rounded-box z-50 w-56 p-2 shadow-xl max-h-96 overflow-y-auto flex-nowrap'>
+            {/* Map between each style in the array  */}
             {THEMES.map((t) => (
                 <li key={t}>
                     <button onClick={() => setTheme(t)} className={`flex justify-between ${ Theme === t ? "bg-primary-content" : ""}`}>
