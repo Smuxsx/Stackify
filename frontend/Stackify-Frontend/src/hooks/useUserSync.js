@@ -7,10 +7,10 @@ function useUserSync() {
     const { isSignedIn } = useAuth();
     const { user } = useUser()
 
-    const {mutate: syncUserMutation, isPending, isSuccess} = useMutation({mutationFn: syncUser})
+    const {mutate: syncUserMutation, isIdle, isSuccess} = useMutation({mutationFn: syncUser})
 
     useEffect(() => {
-        if (!isPending && isSignedIn && user && !isSuccess){
+        if (isIdle && isSignedIn && user){
             syncUserMutation({
                 email: user.primaryEmailAddress.emailAddress,
                 name: user.fullName || user.firstName,
@@ -18,7 +18,7 @@ function useUserSync() {
             })
         }
         
-    }, [isSignedIn, user, syncUserMutation, isPending, isSuccess])
+    }, [isSignedIn, user, syncUserMutation, isIdle])
 
     return { isSynced: isSuccess}
 }
