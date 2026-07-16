@@ -8,7 +8,8 @@ import commentRoutes from "./routes/commentRoutes.ts";
 
 const app = express()
 
-app.use(cors({origin: ENV.FRONTEND_URL})) // Enable CORS for the frontend URL specified in the environment variables. This allows our frontend to make requests to this backend without CORS issues.
+app.use(cors({origin: ENV.FRONTEND_URL, credentials: true})) // Enable CORS for the frontend URL specified in the environment variables. This allows our frontend to make requests to this backend without CORS issues.
+// Credential allows the frontend to send cookies to the backend so authentication with the user is possible.
 app.use(clerkMiddleware()) // Auth obj will be available in req.auth after this middleware.
 app.use(express.json()) // parses JSON request bodies.
 app.use(express.urlencoded({extended: true})); // parses form data (Like HTML forms).
