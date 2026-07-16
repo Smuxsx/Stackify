@@ -15,8 +15,8 @@ const useAuthRequest = () => {
                 if(token) {
                     config.headers.Authorization = `Bearer ${token}`
                 }
-                return config;
             }
+            return config;
         }) ;
         return () => api.interceptors.request.eject(interceptor);
     }, [isSignedIn, getToken])    
