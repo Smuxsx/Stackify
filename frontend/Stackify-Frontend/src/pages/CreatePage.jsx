@@ -50,7 +50,7 @@ function CreatePage() {
           {/* IMAGE PREVIEW */}
           {formData.imageUrl && (
             <div className="rounded-box overflow-hidden">
-              <img src={formData.imageUrl} alt="Preview" className="w-full h-40 object-cover" onError={(e) => (e.target.style.display = "none")}/>
+              <img key={formData.imageUrl} src={formData.imageUrl} alt="Preview" className="w-full h-40 object-cover" onError={(e) => (e.currentTarget.style.display = "none")}/>
             </div>
           )}
           <div className="form-control">
