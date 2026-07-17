@@ -1,8 +1,8 @@
 import { Sparkles } from 'lucide-react';
 
-function SparklesIcon() {
+function SparklesIcon({ className }) {
   return (
-    <Sparkles className='size-2'/>
+    <Sparkles className={className || 'size-2'}/>
   )
 }
 
