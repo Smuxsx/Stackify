@@ -9,7 +9,7 @@ export async function syncUser(req:Request, res:Response) {
 
         const {email, name, imageUrl} = req.body
 
-        if (!email || !name || !imageUrl) {
+        if (!email || !name) {
             return res.status(400).json({error: "Email, name and imageUrl are required"})
         }
 
@@ -17,7 +17,7 @@ export async function syncUser(req:Request, res:Response) {
             id: userId,
             email,
             name,
-            imageUrl
+            imageUrl: imageUrl || null
         })
 
         res.status(200).json(user)
