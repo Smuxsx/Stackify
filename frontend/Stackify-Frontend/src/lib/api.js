@@ -28,8 +28,12 @@ export const createProduct = async (productData) => {
     return data;
 }
 
-export const updateProduct = async (id, productData) => {
-    const {data} = await api.put(`/products/${id}`, productData)
+export const updateProduct = async ({id, title, description, imageurl}) => {
+    const {data} = await api.put(`/products/${id}`, {
+        title,
+        description,
+        imageurl
+    })
     return data
 }
 

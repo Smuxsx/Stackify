@@ -50,9 +50,11 @@ function ProfilePage() {
         <div className="grid gap-4">
           {products.map((product) => (
             <div key={product.id} className="card card-side bg-base-300">
-              <figure className="w-32 shrink-0">
-                <img src={product.imageUrl} className="h-full object-cover" />
-              </figure>
+              <div className="card bg-base-300">
+              <figure className="w-36 p-2 shrink-0">
+                <img src={product.imageUrl} className="h-full object-cover rounded-2xl" />
+              </figure>                
+              </div>
               <div className="card-body p-4">
                 <h2 className="card-title text-base">{product.title}</h2>
                 <p className="text-sm text-base-content/60 line-clamp-1">{product.description}</p>
