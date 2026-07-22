@@ -18,6 +18,7 @@ function App(){
     if (!isClerkLoaded) return null;
     return (
       <div className='min-h-screen bg-base-100'>
+        <link rel="shortcut icon" href="/public/favicon.png" type="image/x-icon" />
         <NavBar />
         <main className='max-w-5xl mx-auto px-4 py-8'>
           <Routes>

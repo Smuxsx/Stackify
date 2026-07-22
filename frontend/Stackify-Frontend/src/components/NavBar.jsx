@@ -13,7 +13,7 @@ function NavBar() {
             <div className='flex-1'>
               <Link to="/" className='btn btn-ghost gap-2'>
                 <ShoppingBagIcon className='text-primary size-5'/>
-                <span className='text-lg font-bold font-serif uppercase tracking-tight'>Stackify</span>
+                <span className='text-lg font-bold uppercase tracking-widest'>Stackify</span>
               </Link>
               </div>
               <div className='flex gap-2 items-center '>
