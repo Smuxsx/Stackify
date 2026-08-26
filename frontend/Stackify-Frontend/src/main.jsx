@@ -9,13 +9,15 @@ import {
 } from '@tanstack/react-query'
 import {BrowserRouter} from "react-router"
 
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
 // Create a client
 const queryClient = new QueryClient()
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ClerkProvider>
+    <ClerkProvider publishableKey={clerkPublishableKey}>
       <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <App />
