@@ -1,147 +1,587 @@
-import type { Request, Response } from "express";
-import * as queries from "../db/queries.ts"
+import type {
+  Request,
+  Response,
+} from "express";
+
+import * as queries from "../db/queries.ts";
+
 import { getAuth } from "@clerk/express";
-import { products } from "../db/schema.ts";
+
+import { logger } from "../utils/logger.ts";
 
 
-// Set up a type for the request parameters to ensure type safety when accessing the product ID from the request.
-type productParams = {
-    id: string;
-}
+type ProductParams = {
+  id: string;
+};
 
-// Get all products
-export const getAllProducts = async (req:Request, res:Response) => {
-    try {  
-        const products = await queries.getAllProduct();
-        res.status(200).json(products)
-    } catch (error) {
-        console.error("Error getting products:", error);
-        res.status(500).json({error: "Failed to get products"})
+
+// --------------------------------
+// GET ALL PRODUCTS
+// --------------------------------
+
+export const getAllProducts = async (
+  req: Request,
+  res: Response
+) => {
+  const { userId } = getAuth(req);
+
+  const log = logger.child({
+    requestId: req.requestId,
+    userId,
+    component:
+      "ProductController",
+    operation:
+      "getAllProducts",
+  });
+
+  log.debug("Started");
+
+  try {
+    const products =
+      await queries.getAllProduct({
+        requestId:
+          req.requestId,
+        userId,
+      });
+
+    log.debug("Completed", {
+      resultCount:
+        products.length,
+    });
+
+    return res
+      .status(200)
+      .json(products);
+
+  } catch (error) {
+    log.error(
+      "Failed to get products",
+      {
+        error,
+      }
+    );
+
+    return res
+      .status(500)
+      .json({
+        error:
+          "Failed to get products",
+      });
+  }
+};
+
+
+// --------------------------------
+// GET PRODUCTS FOR CURRENT USER
+// --------------------------------
+
+export const getMyProducts = async (
+  req: Request<ProductParams>,
+  res: Response
+) => {
+  const { userId } = getAuth(req);
+
+  const log = logger.child({
+    requestId: req.requestId,
+    userId,
+    component:
+      "ProductController",
+    operation:
+      "getMyProducts",
+  });
+
+  log.debug("Started");
+
+  try {
+    if (!userId) {
+      log.warn(
+        "Unauthorized request"
+      );
+
+      return res
+        .status(401)
+        .json({
+          error:
+            "Unauthorized",
+        });
     }
-}
 
-// Get products by user
-export const getMyProducts = async (req:Request<productParams>, res:Response) => {
+    const products =
+      await queries
+        .getProductByUserId(
+          userId,
+          {
+            requestId:
+              req.requestId,
+            userId,
+          }
+        );
+
+    log.debug("Completed", {
+      resultCount:
+        products.length,
+    });
+
+    return res
+      .status(200)
+      .json(products);
+
+  } catch (error) {
+    log.error(
+      "Failed to retrieve user products",
+      {
+        error,
+      }
+    );
+
+    return res
+      .status(500)
+      .json({
+        error:
+          "Error getting products from user id",
+      });
+  }
+};
+
+
+// --------------------------------
+// GET PRODUCT BY ID
+// --------------------------------
+
+export const getProductById =
+  async (
+    req: Request<ProductParams>,
+    res: Response
+  ) => {
+    const { userId } =
+      getAuth(req);
+
+    const { id } = req.params;
+
+    const log = logger.child({
+      requestId:
+        req.requestId,
+      userId,
+      component:
+        "ProductController",
+      operation:
+        "getProductById",
+      productId: id,
+    });
+
+    log.debug("Started");
+
     try {
-        const { userId } = getAuth(req)
-        if (!userId) return res.status(401).json({error: "Unathorized"})
+      const product =
+        await queries
+          .getProductById(
+            id,
+            {
+              requestId:
+                req.requestId,
+              userId,
+            }
+          );
 
-        const products = await queries.getProductByUserId(userId)
+      if (!product) {
+        log.warn(
+          "Product not found"
+        );
 
-        res.status(200).json(products)
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found",
+          });
+      }
+
+      log.debug("Completed");
+
+      return res
+        .status(200)
+        .json(product);
+
     } catch (error) {
-        console.log("Error Fetching products from user id", error);
-        res.status(500).json({error: "Error getting products from user id"})
-    }
-}
+      log.error(
+        "Failed to fetch product",
+        {
+          error,
+        }
+      );
 
-// Get product by ID 
-export const getProductById = async (req:Request<productParams>, res:Response) => {
+      return res
+        .status(500)
+        .json({
+          error:
+            "Failed to get product",
+        });
+    }
+  };
+
+
+// --------------------------------
+// CREATE PRODUCT
+// --------------------------------
+
+export const createProduct =
+  async (
+    req: Request<ProductParams>,
+    res: Response
+  ) => {
+    const { userId } =
+      getAuth(req);
+
+    const log = logger.child({
+      requestId:
+        req.requestId,
+      userId,
+      component:
+        "ProductController",
+      operation:
+        "createProduct",
+    });
+
+    log.debug("Started");
+
     try {
-        const { id } = req.params;
-        const product = await queries.getProductById(id)
+      if (!userId) {
+        log.warn(
+          "Unauthorized request"
+        );
 
-        if (!product) return res.status(404).json({Error: "Product not found"})
+        return res
+          .status(401)
+          .json({
+            error:
+              "Unauthorized",
+          });
+      }
 
-        res.status(200).json(product)
+      const {
+        title,
+        description,
+        imageUrl,
+      } = req.body;
+
+      if (
+        !title ||
+        !description ||
+        !imageUrl
+      ) {
+        log.warn(
+          "Invalid request body"
+        );
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Title, description and imageUrl required",
+          });
+      }
+
+      const product =
+        await queries
+          .createProduct(
+            {
+              title,
+              description,
+              imageUrl,
+              userId,
+            },
+
+            {
+              requestId:
+                req.requestId,
+              userId,
+            }
+          );
+
+      log.debug("Completed", {
+        productId:
+          product?.id,
+      });
+
+      return res
+        .status(201)
+        .json(product);
+
     } catch (error) {
-        console.log("Error Fetching product", error);
-        res.status(500).json({error: "Failed to get product"})
+      log.error(
+        "Failed to create product",
+        {
+          error,
+        }
+      );
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "Failed to create product",
+        });
     }
-}
+  };
 
-// Create Product
 
-export const createProduct = async (req:Request<productParams>, res:Response) => {
+// --------------------------------
+// UPDATE PRODUCT
+// --------------------------------
+
+export const updateProduct =
+  async (
+    req: Request<ProductParams>,
+    res: Response
+  ) => {
+    const { userId } =
+      getAuth(req);
+
+    const { id } = req.params;
+
+    const log = logger.child({
+      requestId:
+        req.requestId,
+      userId,
+      component:
+        "ProductController",
+      operation:
+        "updateProduct",
+      productId: id,
+    });
+
+    log.debug("Started");
+
     try {
-        const { userId } = getAuth(req);
-        if (!userId) return res.status(401).json({error: "Unathorized"})
+      if (!userId) {
+        log.warn(
+          "Unauthorized request"
+        );
 
-        const {title, description, imageUrl} = req.body;
+        return res
+          .status(401)
+          .json({
+            error:
+              "Unauthorized",
+          });
+      }
 
-        if(!title || !description || !imageUrl) {
-            res.status(400).json({error: "Title, description and imageUrl required"})
-            return;
-        }
+      const {
+        title,
+        description,
+        imageUrl,
+      } = req.body;
 
-        const product = await queries.createProduct({
-            title,
-            description,
-            imageUrl,
-            userId
-        })
+      if (
+        !title &&
+        !description &&
+        !imageUrl
+      ) {
+        log.warn(
+          "No update fields provided"
+        );
 
-        res.status(201).json(product)
+        return res
+          .status(400)
+          .json({
+            error:
+              "At least one field required",
+          });
+      }
+
+      const existingProduct =
+        await queries
+          .getProductById(
+            id,
+            {
+              requestId:
+                req.requestId,
+              userId,
+            }
+          );
+
+      if (!existingProduct) {
+        log.warn(
+          "Product not found"
+        );
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found",
+          });
+      }
+
+      if (
+        existingProduct.userId !==
+        userId
+      ) {
+        log.warn(
+          "Forbidden update attempt"
+        );
+
+        return res
+          .status(403)
+          .json({
+            error:
+              "Forbidden",
+          });
+      }
+
+      const updatedProduct =
+        await queries
+          .updateProduct(
+            id,
+            {
+              title,
+              description,
+              imageUrl,
+            },
+
+            {
+              requestId:
+                req.requestId,
+              userId,
+            }
+          );
+
+      log.debug("Completed");
+
+      return res
+        .status(200)
+        .json(updatedProduct);
+
     } catch (error) {
-        console.error("Error Creating product", error)
-        res.status(500).json({error: "Failed to create product"})
-    }
-    
-}
+      log.error(
+        "Failed to update product",
+        {
+          error,
+        }
+      );
 
-// Update Product
-export const updateProduct = async (req:Request<productParams>, res:Response) => {
+      return res
+        .status(500)
+        .json({
+          error:
+            "Failed to update product",
+        });
+    }
+  };
+
+
+// --------------------------------
+// DELETE PRODUCT
+// --------------------------------
+
+export const deleteProduct =
+  async (
+    req: Request<ProductParams>,
+    res: Response
+  ) => {
+    const { userId } =
+      getAuth(req);
+
+    const { id } = req.params;
+
+    const log = logger.child({
+      requestId:
+        req.requestId,
+      userId,
+      component:
+        "ProductController",
+      operation:
+        "deleteProduct",
+      productId: id,
+    });
+
+    log.debug("Started");
+
     try {
-        const { userId } = getAuth(req);
-        if (!userId) return res.status(401).json({error: "Unathorized"});
+      if (!userId) {
+        log.warn(
+          "Unauthorized request"
+        );
 
-        const { id } = req.params;
-        const {title, description, imageUrl} = req.body;
+        return res
+          .status(401)
+          .json({
+            error:
+              "Unauthorized",
+          });
+      }
 
-        if (!title && !description && !imageUrl) {
-            res.status(400).json({error: "At least one field (title, description, or imageUrl) required"});
-            return;
+      const existingProduct =
+        await queries
+          .getProductById(
+            id,
+            {
+              requestId:
+                req.requestId,
+              userId,
+            }
+          );
+
+      if (!existingProduct) {
+        log.warn(
+          "Product not found"
+        );
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found",
+          });
+      }
+
+      if (
+        existingProduct.userId !==
+        userId
+      ) {
+        log.warn(
+          "Forbidden delete attempt"
+        );
+
+        return res
+          .status(403)
+          .json({
+            error:
+              "Forbidden",
+          });
+      }
+
+      await queries.deleteProduct(
+        id,
+        {
+          requestId:
+            req.requestId,
+          userId,
         }
+      );
 
-        // Check if product exists and belongs to user
-        const existingProduct = await queries.getProductById(id);
+      log.debug("Completed");
 
-        if (!existingProduct) {
-            res.status(404).json({error: "Product not found"});
-            return;
-        }
+      return res
+        .status(200)
+        .json({
+          message:
+            "Product deleted successfully",
+        });
 
-        if (existingProduct.userId !== userId) {
-            res.status(403).json({error: "Forbidden"});
-            return
-        }
-        
-        const updatedProduct = await queries.UpdateProduct(id, {
-            title,
-            description,
-            imageUrl
-        })
-        res.status(200).json(updatedProduct)
-        
     } catch (error) {
-        console.error("Error updating product", error);
-        res.status(500).json({error: "Failed to update product"})
-    }
-}
-
-// Delete Product
-export const deleteProduct = async (req:Request<productParams>, res:Response) => {
-    try {
-        const { userId } = getAuth(req);
-        if (!userId) return res.status(401).json({error: "Unathorized"});
-
-        const { id } = req.params;
-        const existingProduct = await queries.getProductById(id);
-
-        if (!existingProduct) return res.status(404).json({ error: "Product not found"})
-
-        if (existingProduct.userId !== userId) {
-            res.status(403).json({error: "Forbidden"});
-            return;
+      log.error(
+        "Failed to delete product",
+        {
+          error,
         }
+      );
 
-        await queries.deleteProduct(id);
-
-        res.status(200).json({message: "Product deleted successfully"})
-
-
-    } catch (error) {
-        console.error("Error deleting product", error);
-        res.status(500).json({error: "Failed to delete product"})
+      return res
+        .status(500)
+        .json({
+          error:
+            "Failed to delete product",
+        });
     }
-}
+  };
