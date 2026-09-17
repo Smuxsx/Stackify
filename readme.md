@@ -95,12 +95,13 @@ Make sure you have the following installed:
 * PostgreSQL
 * A Clerk account
 
-**1.Clone the repository**
+**1. Clone the repository**
 
 git clone https://github.com/Smuxsx/Stackify.git
+
 cd Stackify
 
-**2.Backend Setup**
+**2. Backend Setup**
 
 Move into the backend directory:
 
